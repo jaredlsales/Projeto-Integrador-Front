@@ -1,0 +1,87 @@
+/* O Cartão em si */
+.card {
+    background-color: white;
+    border-radius: 12px;
+    width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+
+    /* A TESOURA MÁGICA: */
+    overflow: hidden; /* Garante que a imagem não "fure" o arredondamento */
+
+    /* Transição para quando passarmos o mouse depois */
+    transition: transform 0.2;
+    cursor: pointer;
+}
+
+.card:houver {
+    transform: translateY(-5px); /* Efeito de subir ao passar o mouse */
+}
+
+/* Container da Imagem */
+.image-container {
+    width: 100%;
+    height: 160px; /* Altura fixa para todas as fotos ficarem iguais */
+    position: relative; /* Importante para posicionar a Badge "absolutamente" aqui dentro */
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ESSENCIAL: Corta a imagem para preencher sem esticar/deformar */
+}
+
+/* A Etiqueta "Lanches" */
+.badge {
+    position: absolute; /* Flutua em cima da imagem */
+    top: 10px;
+    right: 10px;
+    background-color: white;
+    color: #333;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+}
+
+/* Área de Texto */
+.card-info {
+    padding: 16px;
+}
+
+.card-info h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    color: #333;
+    white-space: nomal;
+}
+
+.description {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 16px;
+    line-height: 1.4; /* Melhora a leitura */
+}
+
+/* O Rodapé do Card (Flexbox) */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 0px 10px 10px 10px;
+    
+}
+
+.rating, .time, .price {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rating {
+    color: black;
+    font-weight: bold;
+}
