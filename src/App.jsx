@@ -35,8 +35,6 @@ function App() {
       toast.warn("Precisa preencher todos os campos!")
       return
     }
-    const idPedido = "1c7df282-08ac-4d8d-8bc2-c6508bca0be9"
-    const idProduto = "139b513a-9ac0-4796-8977-e25ae414d90c"
 
     try {
       const resposta = await apiLocal.post("/ItensPedidosControllers",{
@@ -54,9 +52,19 @@ function App() {
       
     }
   }
+
+  //Metodo DELETE
+   async function deletarItensPedidos(id) {
+    try {
+      const resposta = await apiLocal.delete(`/ApagarItensPedidos/${id}`)
+      toast.success("Registro Excluido Com Sucesso!")
+      console.log(resposta.data.dados)
+    } catch (err) {
+      toast.warning("Registro nao encontrado!")
+      console.log(err)
+    }
+   }
   
-
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
@@ -84,6 +92,8 @@ function App() {
               <p>Total: {item.total_unitario}</p>
               <p>Numero Pedido: {item.pedidos?.numero_pedido}</p>
               <p>Produto: {item.produtos?.categorias?.categoria}</p>
+              <button className='apagar' onClick={()=> deletarItensPedidos(item.id)}>Apagar</button>
+              <button className='alterar'>Alterar</button>
             </div>
           )
         })}
@@ -98,7 +108,6 @@ function App() {
           <label htmlFor="total_unitario">Total unitario: </label>
           <input type="number" step="1" placeholder='Digite o Total unitario' value={total_unitario} onChange={(e) => setTotalUnitario(e.target.value)} required />
         </form>
-
       </div>
 
       
