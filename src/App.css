@@ -19,3 +19,50 @@
     flex-wrap: wrap; /* Se faltar espaço, joga o card pra linha de baixo */
     justify-content: flex-start; /*centralizar os cards se sobrar espaço */
 }
+
+/* Estilo para os cards de item */
+.item-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+/* Estilos para botões de ação */
+.apagar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.apagar:hover {
+  background-color: #c82333;
+}
+
+.alterar {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.alterar:hover {
+  background-color: #e0a800;
+}
+
+/* Botão de cancelar edição */
+button[style*="background: #ff9900"] {
+  background-color: #ff9900 !important;
+  color: white;
+}
+
+button[style*="background: #ff9900"]:hover {
+  background-color: #e68a00 !important;
+}
