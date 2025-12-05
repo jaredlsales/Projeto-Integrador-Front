@@ -59,6 +59,8 @@ function App() {
       const resposta = await apiLocal.delete(`/ApagarItensPedidos/${id}`)
       toast.success("Registro Excluido Com Sucesso!")
       console.log(resposta.data.dados)
+      // Atualiza a lista automaticamente
+      consultarItensPedidos()
     } catch (err) {
       toast.warning("Registro nao encontrado!")
       console.log(err)
