@@ -1,27 +1,4 @@
-.header-container {
-    background: linear-gradient(90deg,#FF6B35 0%, #FF9F43 100% );
-    height: 250px;
-    width: 100%; /* Garante que estica, ocupa 100% ta tela */
-    /*Centralização*/
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-align: center;
-}
-
-.header-container h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.header-container p {
-    font-size: 1rem;
-    opacity: 0.9;  /*Deixa levemente transparente para suavizar*/
-}
-
+@import "tailwindcss";
 
 
 
