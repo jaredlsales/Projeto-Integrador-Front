@@ -9,13 +9,13 @@ function ProductCard () {
 
             {/* Detalhes */}
             <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-800 mb-1">X-Bacon</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-1">X-Bacon</h3>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2 grow">Pão, hambúrguer, bacon, queijo, maionese, ketchup, alface e tomate.</p>
             </div>
 
             {/* Preço e Botão Adicionar */}
             <div className="flex justify-between items-center py-3 mt-5 mr-5 ml-5 border-t border-gray-50">
-                <span className="text-xl font-bold text-orange-600 " >R$15,00</span>
+                <span className="text-xl font-bold text-orange-600 " >R$ 15,00</span>
                 <button className="bg-orange-500 hover:bg-amber-600 text-white px-4 py-2 rounded-2xl font-medium flex items-center gap-2 hover:bg-600 transition-all active:scale-95 shadow-lg shadow-orange-200">
                     <span className="text-center "> + Adicionar</span>
                 </button>

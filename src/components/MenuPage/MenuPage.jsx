@@ -1,11 +1,25 @@
 import React from "react";
 import ProductCard from "../ProductCard/ProductCard";
+import { useNavigate } from 'react-router-dom'
 
 function MenuPage () {
+
+    const navigate = useNavigate();
+
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
             {/* Cabeçalho do Restaurante */}
-            <header className="bg-linear-to-r from-orange-500 to-orange-400 text-white" p-6 md:px-20>
+            <header className="bg-linear-to-r from-orange-500 to-orange-400 text-white p-4 md:px-10 flex flex-col items-start ">
+
+                {/* BOTÃO VOLTAR - ADICIONE ESTE BLOCO ABAIXO */}
+                <button 
+                    onClick={() => navigate('/')} // Volta para a Home
+                    className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity font-medium"
+                >
+                    <span className="text-xl">←</span> 
+                    <span>Voltar</span>
+                </button>
+
                 <h1 className="text-3xl font-bold">Bauru Lanches</h1>
                 <p className="opacity-90 text-sm mt-1">Os melhores lanches da região! Hambúrgueres artesanais e hot dogs especiais.</p>
                 
