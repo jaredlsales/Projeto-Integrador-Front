@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "../ProductCard/ProductCard";
 import { useNavigate } from 'react-router-dom'
 import CartModal from "../CartModal/CartModal";
 import CheckoutModal from "../CheckoutModal/CheckoutModal";
+import apiLocal from "../../api/apiLocal";
 
 function MenuPage() {
     const navigate = useNavigate();
@@ -53,6 +54,59 @@ function MenuPage() {
         return item ? item.quantidade : 0;
     };
 
+
+    //Hook - VisualizarProdutos
+
+    const [produtosBanco, setProdutosBanco] = useState([]);
+
+    useEffect(() => {
+        async function buscarProdutos() {
+            try {
+                const resposta = await apiLocal.get("/VisualizarProdutos");
+                setProdutosBanco(resposta.data);// Aqui os dados do seu MySQL entram no React
+                console.log(resposta.data)
+            } catch (error) {
+                console.error("Erro ao conectar com Back-end", error);
+            }
+        }
+        buscarProdutos();
+    }, []);
+
+    //Hook - Categorias
+
+    const [categoriasBanco, setCategoriasBanco] = useState([]);
+
+    useEffect(() => {
+        async function loadDados() {
+            try {
+                // Busca os produtos
+                const resProdutos = await apiLocal.get("/VisualizarProdutos");
+                setProdutosBanco(resProdutos.data);
+
+                // Busca as categorias (Sua rota: /VisualizarCategoria)
+                const resCategorias = await apiLocal.get("/VisualizarCategoria");
+                setCategoriasBanco(resCategorias.data);
+                
+                // Define a primeira categoria do banco como ativa por padrão
+                if (resCategorias.data.length > 0) {
+                    setCategoriaAtiva(resCategorias.data[0].categoria);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            }
+        }
+        loadDados();
+    }, []);
+
+   const produtosFiltrados = produtosBanco.filter(prod => {
+    // 1. Encontra o objeto da categoria que tem o nome igual ao botão clicado
+    const categoriaSelecionada = categoriasBanco.find(c => c.categoria === categoriaAtiva);
+    
+    // 2. Compara o idCategoria do produto com o ID da categoria do botão
+    return prod.idCategoria === categoriaSelecionada?.id;
+    });
+
+
     return (
         <div className="min-h-screen bg-gray-50 pb-10 text-left relative">
             <header className="bg-orange-500 text-white p-6 md:px-20 flex flex-col items-start">
@@ -66,15 +120,18 @@ function MenuPage() {
                 </div>
             </header>
 
-            {/* Navegação de Categorias (VOLTOU!) */}
-            <nav className="flex justify-center gap-4 my-8">
-                {['Lanches', 'Porções', 'Bebidas'].map((cat) => (
+            {/* Navegação de Categorias */}
+            <nav className="flex justify-center gap-4 my-8 overflow-x-auto px-4">
+                {categoriasBanco.map((cat) => (
                     <button 
-                        key={cat}
-                        onClick={() => setCategoriaAtiva(cat)}
-                        className={`${categoriaAtiva === cat ? 'bg-white text-gray-800 border-gray-300 shadow-sm' : 'bg-gray-200 text-gray-500'} px-6 py-2 rounded-full font-bold transition-all`}
+                        key={cat.id}
+                        onClick={() => setCategoriaAtiva(cat.categoria)}
+                        className={`${categoriaAtiva === cat.categoria 
+                            ? 'bg-white text-gray-800 border-gray-300 shadow-sm' 
+                            : 'bg-gray-200 text-gray-500'} 
+                            px-6 py-2 rounded-full font-bold transition-all whitespace-nowrap`}
                     >
-                        {cat}
+                        {cat.categoria}
                     </button>
                 ))}
             </nav>
@@ -164,7 +221,29 @@ function MenuPage() {
                 onClose={() => setIsCheckoutOpen(false)} 
                 total={totalCarrinho.toFixed(2)} 
             />
+
+            <main className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {produtosFiltrados.map((prod) => (
+                    <ProductCard 
+                        key={prod.id}
+                        nome={prod.nome_produto}
+                        ingredientes={prod.descricao}
+                        preco={prod.valor.toFixed(2)}
+                        imagemUrl="https://images.unsplash.com/photo-1556710807-a9261a86064c?w=500" // Uma foto de refri padrão
+                        quantidade={carrinho.find(item => item.id === prod.id)?.quantidade || 0}
+                        onAdd={() => adicionarAoCarrinho({
+                            id: prod.id, 
+                            nome: prod.nome_produto, 
+                            preco: prod.valor
+                        })}
+                        onRemove={() => diminuirQuantidade(prod.id)}
+                    />
+                ))}
+            </main>
+
         </div>
+    
+        
     );
 }
 
