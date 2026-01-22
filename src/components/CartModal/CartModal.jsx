@@ -26,7 +26,7 @@ const CartModal = ({ isOpen, onClose, onCheckout, itens, total, onRemove }) => {
                   <p className="text-sm text-gray-500">Quantidade: {item.quantidade}</p>
                   <p className="font-bold text-orange-600 mt-1">R$ {item.preco}</p>
                 </div>
-                <button onClick={() => onRemove(item.nome)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg">
+                <button onClick={() => onRemove(item.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg">
                   🗑️
                 </button>
               </div>

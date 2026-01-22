@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../ProductCard/ProductCard";
-import { useNavigate } from 'react-router-dom'
+import {useNavigate } from 'react-router-dom'
 import CartModal from "../CartModal/CartModal";
 import CheckoutModal from "../CheckoutModal/CheckoutModal";
 import apiLocal from "../../api/apiLocal";
@@ -9,7 +9,7 @@ function MenuPage() {
     const navigate = useNavigate();
     
     // Estados de Controle
-    const [categoriaAtiva, setCategoriaAtiva] = useState('Lanches');
+    const [categoriaAtiva, setCategoriaAtiva] = useState('Bebidas');
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
@@ -18,78 +18,66 @@ function MenuPage() {
 
     const adicionarAoCarrinho = (produto) => {
         setCarrinho((itensAtuais) => {
-            const itemExiste = itensAtuais.find((item) => item.nome === produto.nome);
+            const itemExiste = itensAtuais.find((item) => item.id === produto.id);
             if (itemExiste) {
                 return itensAtuais.map((item) =>
-                    item.nome === produto.nome ? { ...item, quantidade: item.quantidade + 1 } : item
+                    item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
                 );
             }
-            return [...itensAtuais, { ...produto, quantidade: 1 }];
+            return [...itensAtuais, { 
+                ...produto, 
+                quantidade: 1,
+                // Adiciona a imagem ao produto no carrinho também
+                imagemUrl: produto.imagemUrl 
+            }];
         });
     };
 
-    const diminuirQuantidade = (nome) => {
+    const diminuirQuantidade = (id) => {
         setCarrinho((itensAtuais) => {
-            const itemExiste = itensAtuais.find((item) => item.nome === nome);
+            const itemExiste = itensAtuais.find((item) => item.id === id);
             if (itemExiste && itemExiste.quantidade > 1) {
                 return itensAtuais.map((item) =>
-                    item.nome === nome ? { ...item, quantidade: item.quantidade - 1 } : item
+                    item.id === id ? { ...item, quantidade: item.quantidade - 1 } : item
                 );
             }
-            return itensAtuais.filter((item) => item.nome !== nome);
+            return itensAtuais.filter((item) => item.id !== id);
         });
     };
 
-    const removerTotalmente = (nome) => {
-        setCarrinho(carrinho.filter(item => item.nome !== nome));
+    const removerTotalmente = (id) => {
+        setCarrinho(carrinho.filter(item => item.id !== id));
     };
 
     // Cálculos Dinâmicos
     const totalCarrinho = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
     const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
 
-    // Função auxiliar para pegar a quantidade de um produto específico
-    const getQuantidade = (nome) => {
-        const item = carrinho.find(i => i.nome === nome);
-        return item ? item.quantidade : 0;
+    // FUNÇÃO PARA IMAGEM POR CATEGORIA
+    const getImagemPorCategoria = (categoria) => {
+        const imagens = {
+            'Bebidas': 'https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=500&auto=format&fit=crop', // Refrigerante
+            'Lanches': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop', // Hambúrguer
+            'Porções': 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=500&auto=format&fit=crop' // Batata frita
+        };
+        return imagens[categoria] || 'https://images.unsplash.com/photo-1556710807-a9261a86064c?w=500&auto=format&fit=crop';
     };
 
-
-    //Hook - VisualizarProdutos
-
     const [produtosBanco, setProdutosBanco] = useState([]);
-
-    useEffect(() => {
-        async function buscarProdutos() {
-            try {
-                const resposta = await apiLocal.get("/VisualizarProdutos");
-                setProdutosBanco(resposta.data);// Aqui os dados do seu MySQL entram no React
-                console.log(resposta.data)
-            } catch (error) {
-                console.error("Erro ao conectar com Back-end", error);
-            }
-        }
-        buscarProdutos();
-    }, []);
-
-    //Hook - Categorias
-
     const [categoriasBanco, setCategoriasBanco] = useState([]);
 
     useEffect(() => {
         async function loadDados() {
             try {
-                // Busca os produtos
                 const resProdutos = await apiLocal.get("/VisualizarProdutos");
                 setProdutosBanco(resProdutos.data);
 
-                // Busca as categorias (Sua rota: /VisualizarCategoria)
                 const resCategorias = await apiLocal.get("/VisualizarCategoria");
                 setCategoriasBanco(resCategorias.data);
                 
-                // Define a primeira categoria do banco como ativa por padrão
-                if (resCategorias.data.length > 0) {
-                    setCategoriaAtiva(resCategorias.data[0].categoria);
+                // Garanta que a categoria ativa seja "Bebidas" inicialmente
+                if (categoriaAtiva !== 'Bebidas') {
+                    setCategoriaAtiva('Bebidas');
                 }
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
@@ -98,14 +86,15 @@ function MenuPage() {
         loadDados();
     }, []);
 
-   const produtosFiltrados = produtosBanco.filter(prod => {
-    // 1. Encontra o objeto da categoria que tem o nome igual ao botão clicado
-    const categoriaSelecionada = categoriasBanco.find(c => c.categoria === categoriaAtiva);
-    
-    // 2. Compara o idCategoria do produto com o ID da categoria do botão
-    return prod.idCategoria === categoriaSelecionada?.id;
+    const produtosFiltrados = produtosBanco.filter(prod => {
+        const categoriaNoBanco = categoriasBanco.find(c => 
+            c.categoria.trim().toLowerCase() === categoriaAtiva.trim().toLowerCase()
+        );
+        
+        if (!categoriaNoBanco) return false;
+        
+        return prod.idCategoria === categoriaNoBanco.id;
     });
-
 
     return (
         <div className="min-h-screen bg-gray-50 pb-10 text-left relative">
@@ -136,57 +125,30 @@ function MenuPage() {
                 ))}
             </nav>
 
-            {/* Exibição Condicional (TODAS AS CATEGORIAS VOLTARAM) */}
+            {/* Exibição Dinâmica do Banco de Dados */}
             <main className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {categoriaAtiva === 'Lanches' && (
-                    <>
+                {produtosFiltrados.length > 0 ? (
+                    produtosFiltrados.map((prod) => (
                         <ProductCard 
-                            nome="X-Burger Especial" 
-                            ingredientes="Hambúrguer artesanal, queijo cheddar..." 
-                            preco="18.90" 
-                            imagemUrl="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500"
-                            quantidade={getQuantidade("X-Burger Especial")}
-                            onAdd={() => adicionarAoCarrinho({nome: "X-Burger Especial", preco: "18.90", imagemUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500"})}
-                            onRemove={() => diminuirQuantidade("X-Burger Especial")}
+                            key={prod.id}
+                            nome={prod.nome_produto}
+                            ingredientes={prod.descricao}
+                            preco={prod.valor.toFixed(2)}
+                            imagemUrl={getImagemPorCategoria(categoriaAtiva)} // ← Imagem por categoria
+                            quantidade={carrinho.find(item => item.id === prod.id)?.quantidade || 0}
+                            onAdd={() => adicionarAoCarrinho({
+                                id: prod.id, 
+                                nome: prod.nome_produto, 
+                                preco: prod.valor,
+                                imagemUrl: getImagemPorCategoria(categoriaAtiva) // ← Passa a imagem também
+                            })}
+                            onRemove={() => diminuirQuantidade(prod.id)}
                         />
-                        <ProductCard 
-                            nome="Hot Dog Completo" 
-                            ingredientes="Salsicha premium, molho de tomate..." 
-                            preco="12.90" 
-                            imagemUrl="https://images.unsplash.com/photo-1541214113241-21578d2d9b62?w=500"
-                            quantidade={getQuantidade("Hot Dog Completo")}
-                            onAdd={() => adicionarAoCarrinho({nome: "Hot Dog Completo", preco: "12.90", imagemUrl: "https://images.unsplash.com/photo-1541214113241-21578d2d9b62?w=500"})}
-                            onRemove={() => diminuirQuantidade("Hot Dog Completo")}
-                        />
-                    </>
-                )}
-
-                {categoriaAtiva === 'Porções' && (
-                    <>
-                        <ProductCard 
-                            nome="Batata Frita P" 
-                            ingredientes="Porção individual" 
-                            preco="8.00" 
-                            imagemUrl="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500"
-                            quantidade={getQuantidade("Batata Frita P")}
-                            onAdd={() => adicionarAoCarrinho({nome: "Batata Frita P", preco: "8.00", imagemUrl: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500"})}
-                            onRemove={() => diminuirQuantidade("Batata Frita P")}
-                        />
-                    </>
-                )}
-
-                {categoriaAtiva === 'Bebidas' && (
-                    <>
-                        <ProductCard 
-                            nome="Coca Lata" 
-                            ingredientes="350ml" 
-                            preco="5.00" 
-                            imagemUrl="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500"
-                            quantidade={getQuantidade("Coca Lata")}
-                            onAdd={() => adicionarAoCarrinho({nome: "Coca Lata", preco: "5.00", imagemUrl: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500"})}
-                            onRemove={() => diminuirQuantidade("Coca Lata")}
-                        />
-                    </>
+                    ))
+                ) : (
+                    <p className="col-span-full text-center text-gray-500 py-10">
+                        Nenhum produto encontrado em "{categoriaAtiva}"
+                    </p>
                 )}
             </main>
 
@@ -204,12 +166,13 @@ function MenuPage() {
                 </button>
             </div>
 
+            {/* IMPORTANTE: Certifique-se de passar a função removerTotalmente */}
             <CartModal 
                 isOpen={isCartOpen} 
                 onClose={() => setIsCartOpen(false)} 
                 itens={carrinho}
                 total={totalCarrinho}
-                onRemove={removerTotalmente}
+                onRemove={removerTotalmente} // ← Esta função deve estar sendo passada
                 onCheckout={() => {
                     setIsCartOpen(false);
                     setIsCheckoutOpen(true);
@@ -221,28 +184,8 @@ function MenuPage() {
                 onClose={() => setIsCheckoutOpen(false)} 
                 total={totalCarrinho.toFixed(2)} 
             />
-
-            <main className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {produtosFiltrados.map((prod) => (
-                    <ProductCard 
-                        key={prod.id}
-                        nome={prod.nome_produto}
-                        ingredientes={prod.descricao}
-                        preco={prod.valor.toFixed(2)}
-                        imagemUrl="https://images.unsplash.com/photo-1556710807-a9261a86064c?w=500" // Uma foto de refri padrão
-                        quantidade={carrinho.find(item => item.id === prod.id)?.quantidade || 0}
-                        onAdd={() => adicionarAoCarrinho({
-                            id: prod.id, 
-                            nome: prod.nome_produto, 
-                            preco: prod.valor
-                        })}
-                        onRemove={() => diminuirQuantidade(prod.id)}
-                    />
-                ))}
-            </main>
-
         </div>
-    
+
         
     );
 }
